@@ -1,0 +1,26 @@
+{
+  "name": "demand",
+  "title": "Demand",
+  "description": "A JavaScript solution for creating your own CDN for all of your JS code.",
+  "version": "1.0.0",
+  "homepage": "https://github.com/asec/demand",
+  "author": {
+    "name": "Roland Zsámboki",
+    "email": "zsamboki.roland@gmail.com",
+    "url": "https://github.com/asec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "none"
+  },
+  "bugs": "",
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "/blob/master/LICENSE-MIT"
+    }
+  ],
+  "dependencies": {
+  },
+  "keywords": []
+}
