@@ -56,7 +56,6 @@ var Demand = {
 
 	execute: function(demandString, functionToCall)
 	{
-		functionToCall = functionToCall;
 		var result = this.parseMarker(demandString);
 
 		var realPackageName = result.packageName;
