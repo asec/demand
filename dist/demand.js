@@ -1,4 +1,4 @@
-/*! Demand - v1.0.0 - 2015-01-17
+/*! Demand - v1.0.0 - 2015-01-18
 * https://github.com/asec/demand
 * Copyright (c) 2015 Roland Zsámboki; Licensed MIT */
 (function(){
@@ -69,7 +69,6 @@ var Demand = {
 
 	execute: function(demandString, functionToCall)
 	{
-		functionToCall = functionToCall;
 		var result = this.parseMarker(demandString);
 
 		var realPackageName = result.packageName;
