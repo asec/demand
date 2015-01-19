@@ -14,6 +14,12 @@
 
 	// Registering the available packages
 	Demand.registerPackage("jquery", "latest");
+	Demand.registerPackage("bootstrap", "3", [
+		{css: "css/bootstrap.min.css"}, {css: "css/bootstrap-theme.min.css"}, {demand: "jquery.latest"}
+	]);
+	Demand.registerPackage("bootstrap", "2", [
+		{css: "css/bootstrap.min.css"}, {css: "css/bootstrap-responsive.min.css"}, {demand: "jquery.latest"}
+	]);
 
 	var d = function(demandString, functionToCall)
 	{

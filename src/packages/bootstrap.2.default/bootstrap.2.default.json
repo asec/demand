@@ -1,0 +1,26 @@
+{
+  "name": "bootstrap.2",
+  "title": "Bootstrap",
+  "description": "The latest available version of Bootstrap 2.x",
+  "version": "2.3.2",
+  "homepage": "https://github.com/asec/demand",
+  "author": {
+    "name": "Roland Zsámboki",
+    "email": "zsamboki.roland@gmail.com",
+    "url": "https://github.com/asec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "none"
+  },
+  "bugs": "",
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "/blob/master/LICENSE-MIT"
+    }
+  ],
+  "dependencies": {
+  },
+  "keywords": []
+}

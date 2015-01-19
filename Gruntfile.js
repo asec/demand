@@ -4,23 +4,33 @@ module.exports = function(grunt) {
 
   var packageName = grunt.option("p") || null;
   var packageStandardName = null;
+  var needsUglify = !grunt.option("no-uglify");
+  var noLint = false, hasAssets = false;
   if (packageName)
   {
     packageStandardName = packageName.split(".");
     packageStandardName = packageStandardName[0] + "." + packageStandardName[1] + "." + (packageStandardName[2] ? packageStandardName[2] : "default");
+    noLint = grunt.file.exists("src/packages/" + packageStandardName + "/" + packageStandardName + ".nolint.js");
+    hasAssets = grunt.file.isDir("src/packages/" + packageStandardName + "/.assets");
   }
 
   // Project configuration.
   grunt.initConfig({
     // Metadata.
     pkg: grunt.file.readJSON('demand.json'),
+    packagePkg: packageName ? grunt.file.readJSON('src/packages/' + packageStandardName + '/' + packageStandardName + '.json') : {},
     banner: '/*! <%= pkg.title || pkg.name %> - v<%= pkg.version %> - ' +
       '<%= grunt.template.today("yyyy-mm-dd") %>\n' +
       '<%= pkg.homepage ? "* " + pkg.homepage + "\\n" : "" %>' +
       '* Copyright (c) <%= grunt.template.today("yyyy") %> <%= pkg.author.name %>;' +
       ' Licensed <%= _.pluck(pkg.licenses, "type").join(", ") %> */\n',
+    bannerPackage: '/*! <%= pkg.title || pkg.name %> Package File: <%= packagePkg.title %> (<%= packagePkg.name %>) - v<%= packagePkg.version %> - ' +
+      '<%= grunt.template.today("yyyy-mm-dd") %>\n' +
+      '<%= packagePkg.homepage ? "* " + packagePkg.homepage + "\\n" : "" %>' +
+      '* Copyright (c) <%= grunt.template.today("yyyy") %> <%= packagePkg.author.name %>;' +
+      ' Licensed <%= _.pluck(packagePkg.licenses, "type").join(", ") %> */\n',
     packageName: packageName,
-    footer: ';demand.demandObject.loaded("<%= packageStandardName %>");',
+    footer: 'demand.demandObject.loaded("<%= packageStandardName %>");',
     packageStandardName: packageStandardName,
     // Task configuration.
     clean: {
@@ -94,27 +104,27 @@ module.exports = function(grunt) {
       },
       package: {
         options: {
+          banner: needsUglify ? false : '<%= bannerPackage %>',
           footer: '<%= footer %>',
-          stripBanners: true
         },
-        src: ['build/packages/<%= packageStandardName %>/<%= packageStandardName %>.js'],
+        src: 'build/packages/<%= packageStandardName %>/<%= packageStandardName %>.js',
         dest: 'dist/packages/<%= packageStandardName %>.js'
       }
     },
     uglify: {
       normal: {
-        /*options: {
+        options: {
           banner: '<%= banner %>'
-        },*/
+        },
         src: '<%= concat.normal.dest %>',
         dest: 'dist/<%= pkg.name %>.min.js'
       },
       package: {
         options: {
-          banner: '<%= banner %>'
+          banner: '<%= bannerPackage %>',
         },
         src: '<%= concat.package.dest %>',
-        dest: 'dist/packages/<%= packageStandardName %>.js'
+        dest: '<%= concat.package.dest %>'
       }
     },
     copy: {
@@ -125,6 +135,12 @@ module.exports = function(grunt) {
       nolint: {
         src: "src/packages/<%= packageStandardName %>/<%= packageStandardName %>.nolint.js",
         dest: "src/packages/<%= packageStandardName %>/<%= packageStandardName %>.js"
+      },
+      pckassets: {
+        expand: true,
+        cwd: "src/packages/<%= packageStandardName %>/.assets",
+        src: "**/*",
+        dest: "dist/packages/<%= packageStandardName %>"
       }
     },
     lineremover: {
@@ -187,12 +203,28 @@ module.exports = function(grunt) {
   // Debug task
   grunt.registerTask('debug', ['jshint:normal', 'clean:before', 'string-replace:normal', 'includes:normal', 'concat:normal', 'uglify:normal', 'copy:normal', 'clean:after']);
   // Task for building packages
-  if (grunt.file.exists("src/packages/" + packageStandardName + "/" + packageStandardName + ".nolint.js"))
+  var packageTasks = [];
+  packageTasks.push("jshint:package");
+  packageTasks.push("clean:beforePck");
+  if (noLint)
   {
-    grunt.registerTask('package', ['jshint:package', 'clean:beforePck', 'copy:nolint', 'includes:package', 'concat:package', 'uglify:package', 'clean:afterPck', 'clean:nolint']);
+    packageTasks.push("copy:nolint");
   }
-  else
+  packageTasks.push("includes:package");
+  packageTasks.push("concat:package");
+  if (needsUglify)
   {
-    grunt.registerTask('package', ['jshint:package', 'clean:beforePck', 'includes:package', 'concat:package', 'uglify:package', 'clean:afterPck']);
+    packageTasks.push("uglify:package");
   }
+  packageTasks.push("clean:afterPck");
+  if (noLint)
+  {
+    packageTasks.push("clean:nolint");
+  }
+  if (hasAssets)
+  {
+    packageTasks.push("copy:pckassets");
+  }
+  grunt.registerTask('package', packageTasks);
+
 };

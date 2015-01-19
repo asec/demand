@@ -22,14 +22,21 @@ var Demand = {
 	},
 	lang: {},
 	packages: {},
+	dependencies: {},
 
 	init: function()
 	{
 
 	},
 
-	registerPackage: function(family, package, subpackage)
+	registerPackage: function(family, package, subpackage, dependencies)
 	{
+		if (subpackage && Object.prototype.toString.call(subpackage) === "[object Array]")
+		{
+			dependencies = subpackage;
+			subpackage = null;
+		}
+		dependencies = dependencies || [];
 		subpackage = subpackage || "default";
 		if (!family || !package)
 		{
@@ -52,6 +59,23 @@ var Demand = {
 
 		this.packages[family][package][subpackage].loaded = false;
 		this.packages[family][package][subpackage].queue = new Demand.Queue();
+		this.packages[family][package][subpackage].waiting = [];
+
+		// Registering the given dependencies as well:
+		var depUri, depType;
+		var fullPackageName = family + "." + package + "." + subpackage;
+		this.dependencies[fullPackageName] = [];
+		for (var i = 0; i < dependencies.length; i++)
+		{
+			depType = dependencies[i].css ? "css" : "demand";
+			depUri = dependencies[i].css ? dependencies[i].css : dependencies[i].demand;
+			if (depType === "demand" && depUri === fullPackageName)
+			{
+				console.warn(this.lang.PACKAGE_ERROR_CANTBESELFDEP);
+				continue;
+			}
+			this.addDependency(fullPackageName, depType, depUri);
+		}
 	},
 
 	execute: function(demandString, functionToCall)
@@ -76,14 +100,56 @@ var Demand = {
 		}
 		else
 		{
+			// Loading dependencies:
+			var hasDemandPrerequisit = false;
+			for (var i = 0; i < this.dependencies[realPackageName].length; i++)
+			{
+				var dep = this.dependencies[realPackageName][i];
+				// It it's only a CSS file, queue it
+				if (dep.type === "css")
+				{
+					this.loadCss(dep.uri, realPackageName);
+					continue;
+				}
+				if (dep.type === "demand")
+				{
+					var depPack = this.parseMarker(dep.uri);
+					if (depPack && !depPack.pack.loaded)
+					{
+						hasDemandPrerequisit = true;
+						pack.waiting.push(depPack.packageName);
+						demand(dep.uri);
+					}
+					continue;
+				}
+			}
+
 			// Load the package if it is not yet loaded
-			var url = this.assembleUrl(realPackageName);
-			var script = document.createElement("script");
-			script.type = "text/javascript";
-			script.src = url;
-			script.async = true;
-			document.getElementsByTagName("head")[0].appendChild(script);
+			if (!hasDemandPrerequisit)
+			{
+				this.loadJs(realPackageName);
+			}
 		}
+	},
+
+	loadCss: function(uri, packageName)
+	{
+		var url = this.assembleUrl(uri, true, packageName);
+		var css = document.createElement("link");
+		css.rel = "stylesheet";
+		css.type = "text/css";
+		css.href = url;
+		document.getElementsByTagName("head")[0].appendChild(css);
+	},
+
+	loadJs: function(uri, packageName)
+	{
+		var url = this.assembleUrl(uri, packageName ? true : false, packageName);
+		var script = document.createElement("script");
+		script.type = "text/javascript";
+		script.src = url;
+		script.async = true;
+		document.getElementsByTagName("head")[0].appendChild(script);
 	},
 
 	loaded: function(demandString)
@@ -102,7 +168,30 @@ var Demand = {
 
 		console.log(this.lang.DOWNLOAD_SUCCESS.format(result.packageName));
 		pack.loaded = true;
+
+		// Execute the functions which are waiting for this:
 		demand(result.packageName);
+
+		// Search for the other packages which are waiting for this one:
+		for (var i in this.dependencies)
+		{
+			if (i === result.packageName)
+			{
+				continue;
+			}
+			var depPack = this.parseMarker(i);
+			var foundAsDependency = depPack.pack.waiting.indexOf(result.packageName);
+			if (foundAsDependency > -1)
+			{
+				// Remove this package from the waiting line
+				depPack.pack.waiting.splice(foundAsDependency, 1);
+				// If this was the last package on the waiting line, we can execute the waiting package
+				if (!depPack.pack.waiting.length)
+				{
+					demand(i);
+				}
+			}
+		}
 	},
 
 	parseMarker: function(demandString)
@@ -135,12 +224,37 @@ var Demand = {
 		return result;
 	},
 
-	assembleUrl: function(fileName)
+	assembleUrl: function(fileName, specialFile, packageName)
 	{
+		specialFile = !!specialFile;
 		var cdn = this.settings.get("cdnUrl");
-		var url = cdn + fileName + ".js";
+		var url;
+		if (!specialFile || !packageName)
+		{
+			url = cdn + fileName + ".js";
+		}
+		else
+		{
+			url = cdn + packageName + "/" + fileName;
+		}
 
 		return url;
+	},
+
+	addDependency: function(demandString, type, uri)
+	{
+		var ds = this.parseMarker(demandString);
+		var packageName = ds.packageName;
+		if (typeof this.dependencies[packageName] === "undefined")
+		{
+			this.dependencies[packageName] = [];
+		}
+		this.dependencies[packageName].push({
+			type: type,
+			uri: uri
+		});
+
+		return true;
 	}
 
 };
