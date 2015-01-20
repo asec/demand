@@ -58,6 +58,7 @@ var Demand = {
 		}
 
 		this.packages[family][package][subpackage].loaded = false;
+		this.packages[family][package][subpackage].loading = false;
 		this.packages[family][package][subpackage].queue = new Demand.Queue();
 		this.packages[family][package][subpackage].waiting = [];
 
@@ -108,13 +109,16 @@ var Demand = {
 				// It it's only a CSS file, queue it
 				if (dep.type === "css")
 				{
-					this.loadCss(dep.uri, realPackageName);
+					if (!pack.loading)
+					{
+						this.loadCss(dep.uri, realPackageName);
+					}
 					continue;
 				}
 				if (dep.type === "demand")
 				{
 					var depPack = this.parseMarker(dep.uri);
-					if (depPack && !depPack.pack.loaded)
+					if (depPack && !depPack.pack.loaded && !depPack.pack.loading)
 					{
 						hasDemandPrerequisit = true;
 						pack.waiting.push(depPack.packageName);
@@ -125,10 +129,11 @@ var Demand = {
 			}
 
 			// Load the package if it is not yet loaded
-			if (!hasDemandPrerequisit)
+			if (!hasDemandPrerequisit && !pack.loading)
 			{
 				this.loadJs(realPackageName);
 			}
+			pack.loading = true;
 		}
 	},
 
@@ -161,6 +166,7 @@ var Demand = {
 		}
 
 		var pack = result.pack;
+		pack.loading = false;
 		if (pack.loaded)
 		{
 			return true;
@@ -188,7 +194,8 @@ var Demand = {
 				// If this was the last package on the waiting line, we can execute the waiting package
 				if (!depPack.pack.waiting.length)
 				{
-					demand(i);
+					this.loadJs(i);
+					//demand(i);
 				}
 			}
 		}
