@@ -2,7 +2,10 @@
   "name": "jquery.latest",
   "title": "jQuery",
   "description": "The latest version of jQuery (whichever one is available at the moment in the Demand CDN).",
-  "version": "1.0.0",
+  "noCopyright": true,
+  "noUglify": true,
+  "noLint": true,
+  "version": "1.11.2",
   "homepage": "https://github.com/asec/demand",
   "author": {
     "name": "Roland Zsámboki",

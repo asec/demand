@@ -2,6 +2,9 @@
   "name": "bootstrap.3",
   "title": "Bootstrap",
   "description": "The latest available version of Bootstrap 3.x",
+  "noCopyright": true,
+  "noUglify": true,
+  "noLint": true,
   "version": "3.3.2",
   "homepage": "https://github.com/asec/demand",
   "author": {

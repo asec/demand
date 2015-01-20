@@ -1,6 +1,5 @@
-/*! Demand Package File: Bootstrap (bootstrap.2) - v2.3.2 - 2015-01-19
-* https://github.com/asec/demand
-* Copyright (c) 2015 Roland Zsámboki; Licensed MIT */
+/*! Demand Package File: Bootstrap (bootstrap.2) - v2.3.2 - 2015-01-20
+* https://github.com/asec/demand */
 /*!
 * Bootstrap.js by @fat & @mdo
 * Copyright 2013 Twitter, Inc.

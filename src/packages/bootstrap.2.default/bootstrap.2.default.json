@@ -2,6 +2,9 @@
   "name": "bootstrap.2",
   "title": "Bootstrap",
   "description": "The latest available version of Bootstrap 2.x",
+  "noCopyright": true,
+  "noUglify": true,
+  "noLint": true,
   "version": "2.3.2",
   "homepage": "https://github.com/asec/demand",
   "author": {

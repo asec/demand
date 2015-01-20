@@ -1,4 +1,4 @@
-/*! Demand - v1.0.0 - 2015-01-19
+/*! Demand - v1.0.0 - 2015-01-20
 * https://github.com/asec/demand
 * Copyright (c) 2015 Roland Zsámboki; Licensed MIT */
 (function(){

@@ -4,21 +4,22 @@ module.exports = function(grunt) {
 
   var packageName = grunt.option("p") || null;
   var packageStandardName = null;
-  var needsUglify = !grunt.option("no-uglify");
-  var noLint = false, hasAssets = false;
+  var noLint = false, hasAssets = false, needsUglify = false, packagePkg = null;
   if (packageName)
   {
     packageStandardName = packageName.split(".");
     packageStandardName = packageStandardName[0] + "." + packageStandardName[1] + "." + (packageStandardName[2] ? packageStandardName[2] : "default");
-    noLint = grunt.file.exists("src/packages/" + packageStandardName + "/" + packageStandardName + ".nolint.js");
     hasAssets = grunt.file.isDir("src/packages/" + packageStandardName + "/.assets");
+    packagePkg = grunt.file.readJSON('src/packages/' + packageStandardName + '/' + packageStandardName + '.json');
+    needsUglify = !packagePkg.noUglify;
+    noLint = packagePkg.noLint || false;
   }
 
   // Project configuration.
   grunt.initConfig({
     // Metadata.
     pkg: grunt.file.readJSON('demand.json'),
-    packagePkg: packageName ? grunt.file.readJSON('src/packages/' + packageStandardName + '/' + packageStandardName + '.json') : {},
+    packagePkg: packageName ? packagePkg : {},
     banner: '/*! <%= pkg.title || pkg.name %> - v<%= pkg.version %> - ' +
       '<%= grunt.template.today("yyyy-mm-dd") %>\n' +
       '<%= pkg.homepage ? "* " + pkg.homepage + "\\n" : "" %>' +
@@ -26,9 +27,9 @@ module.exports = function(grunt) {
       ' Licensed <%= _.pluck(pkg.licenses, "type").join(", ") %> */\n',
     bannerPackage: '/*! <%= pkg.title || pkg.name %> Package File: <%= packagePkg.title %> (<%= packagePkg.name %>) - v<%= packagePkg.version %> - ' +
       '<%= grunt.template.today("yyyy-mm-dd") %>\n' +
-      '<%= packagePkg.homepage ? "* " + packagePkg.homepage + "\\n" : "" %>' +
-      '* Copyright (c) <%= grunt.template.today("yyyy") %> <%= packagePkg.author.name %>;' +
-      ' Licensed <%= _.pluck(packagePkg.licenses, "type").join(", ") %> */\n',
+      '<%= packagePkg.homepage ? "* " + packagePkg.homepage : "" %>' +
+      '<%= !packagePkg.noCopyright ? "\\n* Copyright (c) " + grunt.template.today("yyyy") + " " + packagePkg.author.name + ";" : "" %>' +
+      '<%= !packagePkg.noCopyright ? " Licensed " + _.pluck(packagePkg.licenses, "type").join(", ")  : "" %> */\n',
     packageName: packageName,
     footer: 'demand.demandObject.loaded("<%= packageStandardName %>");',
     packageStandardName: packageStandardName,
@@ -45,9 +46,6 @@ module.exports = function(grunt) {
       },
       afterPck: {
         src: ["build"]
-      },
-      nolint: {
-        src: ['src/packages/<%= packageStandardName %>/<%= packageStandardName %>.js']
       }
     },
     'string-replace': {
@@ -104,7 +102,7 @@ module.exports = function(grunt) {
       },
       package: {
         options: {
-          banner: needsUglify ? false : '<%= bannerPackage %>',
+          banner: needsUglify ? '' : '<%= bannerPackage %>',
           footer: '<%= footer %>',
         },
         src: 'build/packages/<%= packageStandardName %>/<%= packageStandardName %>.js',
@@ -131,10 +129,6 @@ module.exports = function(grunt) {
       normal: {
         src: "dist/<%= pkg.name %>.min.js",
         dest: "e:/xampp/htdocs/themes/wp-content/themes/festivity/js/<%= pkg.name %>.js"
-      },
-      nolint: {
-        src: "src/packages/<%= packageStandardName %>/<%= packageStandardName %>.nolint.js",
-        dest: "src/packages/<%= packageStandardName %>/<%= packageStandardName %>.js"
       },
       pckassets: {
         expand: true,
@@ -173,7 +167,7 @@ module.exports = function(grunt) {
         options: {
           jshintrc: 'src/.jshintrc'
         },
-        src: ['src/packages/<%= packageStandardName %>/**/*.js', '!src/packages/<%= packageStandardName %>/<%= packageStandardName %>.nolint.js']
+        src: noLint ? ['src/packages/<%= packageStandardName %>/**/*.js', '!src/packages/<%= packageStandardName %>/<%= packageStandardName %>.js'] : ['src/packages/<%= packageStandardName %>/**/*.js']
       }
     },
     watch: {
@@ -206,10 +200,6 @@ module.exports = function(grunt) {
   var packageTasks = [];
   packageTasks.push("jshint:package");
   packageTasks.push("clean:beforePck");
-  if (noLint)
-  {
-    packageTasks.push("copy:nolint");
-  }
   packageTasks.push("includes:package");
   packageTasks.push("concat:package");
   if (needsUglify)
@@ -217,10 +207,6 @@ module.exports = function(grunt) {
     packageTasks.push("uglify:package");
   }
   packageTasks.push("clean:afterPck");
-  if (noLint)
-  {
-    packageTasks.push("clean:nolint");
-  }
   if (hasAssets)
   {
     packageTasks.push("copy:pckassets");
