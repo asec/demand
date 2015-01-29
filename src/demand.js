@@ -10,7 +10,7 @@
 //@import "../languages/{language}.js"
 
 	// Settings
-	Demand.settings.set("cdnUrl", "http://asec.github.io/demand/demo");
+	Demand.settings.set("cdnUrl", "http://asec.github.io/demand/demo/packages/");
 
 	// Registering the available packages
 	Demand.registerPackage("jquery", "latest");
