@@ -31,7 +31,24 @@
           <h1>
 <a id="demand" class="anchor" href="#demand" aria-hidden="true"><span class="octicon octicon-link"></span></a>Demand</h1>
 
-<p>A JavaScript solution for <a href="demo/demand.min.js">creating</a> your own CDN for all of your JS code. A work in progress project.</p>
+<p>A JavaScript solution for creating your own CDN for all of your JS code. A work in progress project.</p>
+
+<h2>
+<a id="demo" class="anchor" href="#demo" aria-hidden="true"><span class="octicon octicon-link"></span></a>Demo</h2>
+
+<p>Would you like to check out the latest version? All you have to do is to copy the following tag into the <code>head</code> section of your website:</p>
+
+<div class="highlight highlight-html"><pre>&lt;<span class="pl-ent">script</span> <span class="pl-e">type</span>=<span class="pl-s1"><span class="pl-pds">"</span>text/javascript<span class="pl-pds">"</span></span> <span class="pl-e">src</span>=<span class="pl-s1"><span class="pl-pds">"</span>http://asec.github.io/demand/demo/demand.min.js<span class="pl-pds">"</span></span>&gt;&lt;/<span class="pl-ent">script</span>&gt;</pre></div>
+
+<p>After that you can invoke the power of <code>demand</code> simply by writing something like this:</p>
+
+<div class="highlight highlight-javascript"><pre>demand(<span class="pl-s1"><span class="pl-pds">"</span>bootstrap.3<span class="pl-pds">"</span></span>, <span class="pl-st">function</span>(){
+
+    jQuery(<span class="pl-s3">document</span>).on(<span class="pl-s1"><span class="pl-pds">"</span>ready<span class="pl-pds">"</span></span>, <span class="pl-st">function</span>(){
+        <span class="pl-s3">alert</span>(<span class="pl-s1"><span class="pl-pds">"</span>This page now has jQuery and bootstrap support. Pretty neat huh? :)<span class="pl-pds">"</span></span>);
+    });
+
+});</pre></div>
         </section>
 
         <aside id="sidebar">
