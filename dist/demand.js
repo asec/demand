@@ -1,4 +1,4 @@
-/*! Demand - v1.0.0 - 2015-01-20
+/*! Demand - v1.0.0 - 2015-01-29
 * https://github.com/asec/demand
 * Copyright (c) 2015 Roland Zsámboki; Licensed MIT */
 (function(){
@@ -71,6 +71,7 @@ var Demand = {
 		}
 
 		this.packages[family][package][subpackage].loaded = false;
+		this.packages[family][package][subpackage].loading = false;
 		this.packages[family][package][subpackage].queue = new Demand.Queue();
 		this.packages[family][package][subpackage].waiting = [];
 
@@ -121,13 +122,16 @@ var Demand = {
 				// It it's only a CSS file, queue it
 				if (dep.type === "css")
 				{
-					this.loadCss(dep.uri, realPackageName);
+					if (!pack.loading)
+					{
+						this.loadCss(dep.uri, realPackageName);
+					}
 					continue;
 				}
 				if (dep.type === "demand")
 				{
 					var depPack = this.parseMarker(dep.uri);
-					if (depPack && !depPack.pack.loaded)
+					if (depPack && !depPack.pack.loaded && !depPack.pack.loading)
 					{
 						hasDemandPrerequisit = true;
 						pack.waiting.push(depPack.packageName);
@@ -138,10 +142,11 @@ var Demand = {
 			}
 
 			// Load the package if it is not yet loaded
-			if (!hasDemandPrerequisit)
+			if (!hasDemandPrerequisit && !pack.loading)
 			{
 				this.loadJs(realPackageName);
 			}
+			pack.loading = true;
 		}
 	},
 
@@ -174,6 +179,7 @@ var Demand = {
 		}
 
 		var pack = result.pack;
+		pack.loading = false;
 		if (pack.loaded)
 		{
 			return true;
@@ -201,7 +207,8 @@ var Demand = {
 				// If this was the last package on the waiting line, we can execute the waiting package
 				if (!depPack.pack.waiting.length)
 				{
-					demand(i);
+					this.loadJs(i);
+					//demand(i);
 				}
 			}
 		}
@@ -321,7 +328,7 @@ Demand.lang = {
 };
 
 	// Settings
-	Demand.settings.set("cdnUrl", "http://localhost/demand/dist/packages/");
+	Demand.settings.set("cdnUrl", "http://asec.github.io/demand/demo");
 
 	// Registering the available packages
 	Demand.registerPackage("jquery", "latest");
@@ -331,6 +338,11 @@ Demand.lang = {
 	Demand.registerPackage("bootstrap", "2", [
 		{css: "css/bootstrap.min.css"}, {css: "css/bootstrap-responsive.min.css"}, {demand: "jquery.latest"}
 	]);
+	Demand.registerPackage("elux", "framework", "input", [{demand: "jquery.latest"}]);
+	Demand.registerPackage("elux", "framework", "alert");
+	Demand.registerPackage("elux", "framework", "messages", [{demand: "bootstrap.3"}]);
+	Demand.registerPackage("elux", "framework", "dialog", [{demand: "bootstrap.3"}]);
+	Demand.registerPackage("elux", "framework", [{demand: "bootstrap.3"}]);
 
 	var d = function(demandString, functionToCall)
 	{

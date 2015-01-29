@@ -16,6 +16,8 @@
     "demand": true,
     "Demand": true,
     "console": true,
-    "alert": true
+    "alert": true,
+    "elux": true,
+    "jQuery": true
   }
 }
