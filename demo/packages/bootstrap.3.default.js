@@ -1,4 +1,4 @@
-/*! Demand Package File: Bootstrap (bootstrap.3) - v3.3.2 - 2015-01-20
+/*! Demand Package File: Bootstrap (bootstrap.3) - v3.3.2 - 2015-01-29
 * https://github.com/asec/demand */
 /*!
  * Bootstrap v3.3.2 (http://getbootstrap.com)
