@@ -11,6 +11,7 @@
 
 	// Settings
 	Demand.settings.set("cdnUrl", "http://asec.github.io/demand/demo/packages/");
+	Demand.settings.set("listenerUrl", "");
 
 	// Registering the available packages
 	Demand.registerPackage("jquery", "latest");
@@ -26,11 +27,11 @@
 	Demand.registerPackage("elux", "framework", "dialog", [{demand: "bootstrap.3"}]);
 	Demand.registerPackage("elux", "framework", [{demand: "bootstrap.3"}]);
 
-	var d = function(demandString, functionToCall)
+	var d = function(demandString, functionToCall, optionValue)
 	{
 		var demand = this.demand.demandObject;
 
-		return demand.execute(demandString, functionToCall);
+		return demand.execute(demandString, functionToCall, optionValue);
 	};
 
 	d.demandObject = Demand;

@@ -79,8 +79,17 @@ var Demand = {
 		}
 	},
 
-	execute: function(demandString, functionToCall)
+	execute: function(demandString, functionToCall, optionValue)
 	{
+		if (demandString === "set")
+		{
+			if (typeof functionToCall !== "string" || typeof optionValue !== "string")
+			{
+				return false;
+			}
+			this.settings.set(functionToCall, optionValue);
+			return true;
+		}
 		var result = this.parseMarker(demandString);
 
 		var realPackageName = result.packageName;
@@ -102,39 +111,51 @@ var Demand = {
 		else
 		{
 			// Loading dependencies:
-			var hasDemandPrerequisit = false;
-			for (var i = 0; i < this.dependencies[realPackageName].length; i++)
-			{
-				var dep = this.dependencies[realPackageName][i];
-				// It it's only a CSS file, queue it
-				if (dep.type === "css")
-				{
-					if (!pack.loading)
-					{
-						this.loadCss(dep.uri, realPackageName);
-					}
-					continue;
-				}
-				if (dep.type === "demand")
-				{
-					var depPack = this.parseMarker(dep.uri);
-					if (depPack && !depPack.pack.loaded && !depPack.pack.loading)
-					{
-						hasDemandPrerequisit = true;
-						pack.waiting.push(depPack.packageName);
-						demand(dep.uri);
-					}
-					continue;
-				}
-			}
+			var hasDemandPrerequisit = this.loadPrerequisites(realPackageName, pack);
 
 			// Load the package if it is not yet loaded
 			if (!hasDemandPrerequisit && !pack.loading)
 			{
 				this.loadJs(realPackageName);
 			}
+			// Only flag the packages if we are operating from a remote CDN
+			if (Demand.settings.get("listenerUrl"))
+			{
+				this.flagUsedPackage(realPackageName);
+			}
 			pack.loading = true;
 		}
+	},
+
+	loadPrerequisites: function(realPackageName, pack)
+	{
+		var hasDemandPrerequisit = false;
+		for (var i = 0; i < this.dependencies[realPackageName].length; i++)
+		{
+			var dep = this.dependencies[realPackageName][i];
+			// It it's only a CSS file, queue it
+			if (dep.type === "css")
+			{
+				if (!pack.loading)
+				{
+					this.loadCss(dep.uri, realPackageName);
+				}
+				continue;
+			}
+			if (dep.type === "demand")
+			{
+				var depPack = this.parseMarker(dep.uri);
+				if (depPack && !depPack.pack.loaded && !depPack.pack.loading)
+				{
+					hasDemandPrerequisit = true;
+					pack.waiting.push(depPack.packageName);
+					demand(dep.uri);
+				}
+				continue;
+			}
+		}
+
+		return hasDemandPrerequisit;
 	},
 
 	loadCss: function(uri, packageName)
@@ -166,6 +187,10 @@ var Demand = {
 		}
 
 		var pack = result.pack;
+		if (!pack.loading)
+		{
+			this.loadPrerequisites(result.packageName, pack);
+		}
 		pack.loading = false;
 		if (pack.loaded)
 		{
@@ -262,6 +287,109 @@ var Demand = {
 		});
 
 		return true;
+	},
+
+	ajax: {
+
+		xhr: null,
+		queue: [],
+
+		doCall: function(options)
+		{
+			options = {
+				method: options.method.toLowerCase() || "get",
+				error: options.error || null,
+				success: options.success || null,
+				data: options.data || {}
+			};
+			this.queue.push(options);
+			this.execute();
+		},
+
+		execute: function()
+		{
+			if (!this.queue.length)
+			{
+				return false;
+			}
+			if (this.xhr)
+			{
+				return false;
+			}
+			var options = this.queue.shift();
+			// Courtesy of http://stackoverflow.com/questions/8567114/how-to-make-an-ajax-call-without-jquery
+			if (window.XMLHttpRequest)
+			{
+				// code for IE7+, Firefox, Chrome, Opera, Safari
+				this.xhr = new XMLHttpRequest();
+			}
+			else
+			{
+				// code for IE6, IE5
+				this.xhr = new window.ActiveXObject("Microsoft.XMLHTTP");
+			}
+
+			var xhr = this.xhr;
+			var self = this;
+			this.xhr.onreadystatechange = function() {
+				var type;
+				if (xhr.readyState === 4 )
+				{
+					if(xhr.status === 200)
+					{
+						type = (typeof options.success).toLowerCase();
+						if (typeof options.success === "function")
+						{
+							options.success.call(self, xhr.responseText);
+						}
+					}
+					else
+					{
+						type = (typeof options.error).toLowerCase();
+						if (typeof options.error === "function")
+						{
+							options.error.call(self, xhr.responseText);
+						}
+					}
+					self.xhr = null;
+					self.execute();
+				}
+			};
+
+			var query = [];
+			for (var key in options.data)
+			{
+				query.push(encodeURIComponent(key) + '=' + encodeURIComponent(options.data[key]));
+			}
+
+			if (options.method === 'post')
+			{
+				this.xhr.open(options.method, Demand.settings.get("listenerUrl"), true);
+				this.xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+				this.xhr.send(query);
+			}
+			else
+			{
+				this.xhr.open(options.method, Demand.settings.get("listenerUrl") + ((query.length > 0) ? "?" + query.join("&") : ""), true);
+				this.xhr.send();
+			}
+		}
+
+	},
+
+	flagUsedPackage: function(packageName)
+	{
+		var options = {
+			method: "post",
+			data: {
+				packageName: packageName
+			},
+			error: function(responseText)
+			{
+				console.log(responseText);
+			}
+		};
+		this.ajax.doCall(options);
 	}
 
 };
