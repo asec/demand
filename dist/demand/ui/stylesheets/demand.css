@@ -1,0 +1,88 @@
+table.table th, table.table td
+{
+	text-align: left;
+	padding: 3px 8px;
+}
+
+table.table th
+{
+	background: #2e8df2;
+	color: #ffffff;
+	font-weight: 600;
+	font-family: 'Architects Daughter', 'Helvetica Neue', Helvetica, Arial, serif;
+}
+
+table.table td.success, table.table td.error
+{
+	background: #2ef293;
+	font-size: 11px;
+	text-transform: uppercase;
+	text-align: center;
+	width: 20%;
+}
+
+table.table td.error
+{
+	background: #f22e2e;
+	color: #ffffff;
+}
+
+table.table .relevant label
+{
+	font-weight: bold;
+}
+
+table.table .irrelevant label
+{
+	font-style: italic;
+}
+
+header h1, header h2
+{
+	display: inline;
+}
+
+header h1
+{
+	margin-right: 20px;
+}
+
+.text-center
+{
+	text-align: center !important;
+}
+
+.relevance
+{
+	background: #d9d9d9;
+	position: relative;
+	overflow: hidden;
+	height: 15px;
+}
+
+.relevance .relevance-label
+{
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	text-align: center;
+	font-size: 10px;
+	z-index: 10;
+	color: #ffffff;
+}
+
+.relevance .relevance-bar
+{
+	position: absolute;
+	height: 15px;
+	top: 0px;
+	left: 0px;
+	background: #2e8df2;
+}
+
+form.invisible
+{
+	padding: 0px;
+	background: transparent;
+}
