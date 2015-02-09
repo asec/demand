@@ -49,10 +49,10 @@ This will add all of the required JS and CSS files to the `head` section of the 
 Please note that the first (and in this case only) parameter of the `demand` function is the name of the package. This name always consists of 2 or 3 lowercase alphanumeric parts joined by dots:
   1. The first part is the name of the library to which the demanded package belongs. In the example above this was: `bootstrap`
   2. The second part is the name of the exact package you wish to use. A library usually contains one or more packages. In the example above this was: `3` (the main version of the Bootstrap library being used).
-  __These two parts always have to be present.__
+  __These two parts must always be present.__
   3. The third part is optional name of the subpackage. You usually want to organize your more complex packages into multiple modular subpackages so you can better specify the exact functionality you want to use. This value defaults to `default` if omitted.
 
-The _real name_ of a given package is the one that contains all 3 parts. If the name given is not the same as the real name of the package it will be suffixed with `.default` by the code, thus forming a correct real name. Of course you can use the real name in your call as well:
+The _standard name_ of a given package is the one that contains all 3 parts. If the name given is not the same as the standard name of the package it will be suffixed with `.default` by the code, thus forming a correct standard name. Of course you can use the standard name in your call as well:
 ```
 demand("bootstrap.3.default");
 ```
@@ -61,7 +61,7 @@ However, this is not encouraged so feel free to be lazy :)
 It is also worth noting that in order to use a package you need to register it (and it's depencies, if any) in your `/src/demand.js` file. More on that later.
 
 ### Callbacks
-In a real life scenarion you would often use `demand` to execute code __after__ it's dependencies are loaded. Take jQuery as an example: You would include the JS file in your website, and after that you could do some crazy stuff like this:
+In a real life scenario you would often use `demand` to execute code __after__ it's dependencies are loaded. Take jQuery as an example: You would include the JS file in your website, and after that you could do some crazy stuff like this:
 ```
 jQuery(document).on("ready", function(){
 	jQuery("body").html('<p>Nothing to see here, please move along.</p>');
