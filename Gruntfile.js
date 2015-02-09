@@ -74,7 +74,7 @@ module.exports = function(grunt) {
           duplicates: false
         },
         files: [{
-          src: '.build/demand.js',
+          src: '.build/<%= pkg.name %>.js',
           dest: 'build/',
           cwd: './src'
         }]
@@ -126,10 +126,10 @@ module.exports = function(grunt) {
       }
     },
     copy: {
-      normal: {
+      /*normal: {
         src: "dist/<%= pkg.name %>.min.js",
-        dest: "e:/xampp/htdocs/themes/wp-content/themes/festivity/js/<%= pkg.name %>.js"
-      },
+        dest: "/path/to/final.js"
+      },*/
       pckassets: {
         expand: true,
         cwd: "src/packages/<%= packageStandardName %>/.assets",
@@ -140,14 +140,19 @@ module.exports = function(grunt) {
     lineremover: {
       normal: {
         files: {
-          "build/<%= pkg.name %>.js": "build/<%= pkg.name %>.js"
+          "build/.build/<%= pkg.name %>.js": "build/.build/<%= pkg.name %>.js"
         },
         options: {
           exclusionPattern: /^\s*console\..*$/g
         }
       },
       package: {
-
+        files: {
+          "build/<%= packageStandardName %>.js": "build/<%= packageStandardName %>.js"
+        },
+        options: {
+          exclusionPattern: /^\s*console\..*$/g
+        }
       }
     },
     jshint: {
@@ -193,9 +198,9 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-string-replace');
 
   // Default task.
-  grunt.registerTask('default', ['jshint', 'clean:before', 'string-replace', 'includes', 'lineremover', 'concat', 'uglify', 'copy', 'clean:after']);
+  grunt.registerTask('default', ['jshint:normal', 'clean:before', 'string-replace:normal', 'includes:normal', 'lineremover:normal', 'concat:normal', 'uglify:normal',/* 'copy:normal',*/ 'clean:after']);
   // Debug task
-  grunt.registerTask('debug', ['jshint:normal', 'clean:before', 'string-replace:normal', 'includes:normal', 'concat:normal', 'uglify:normal', 'copy:normal', 'clean:after']);
+  grunt.registerTask('debug', ['jshint:normal', 'clean:before', 'string-replace:normal', 'includes:normal', 'concat:normal', 'uglify:normal',/* 'copy:normal',*/ 'clean:after']);
   // Task for building packages
   var packageTasks = [];
   packageTasks.push("jshint:package");
